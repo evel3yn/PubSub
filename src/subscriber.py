@@ -38,7 +38,7 @@ while True:
         temInt[k] = int(tem[k])
         relInt[k] = int(rel[k])
 
-    print("This is history")
+    print("This is received history")
     for l in range(0, 5):
         if zipInt[l] == int(zip_filter):
             print("tem %i" % temInt[l])
@@ -46,4 +46,4 @@ while True:
 
     print('This is received message')
     print("Topic: %s, Temperature: %s, Humidity: %s, Strength: %s" % (
-    zipcodeStr, temperatureStr, relhumidityStr, strengthStr))
+        zipcodeStr, temperatureStr, relhumidityStr, strengthStr))
