@@ -15,6 +15,7 @@ zip_filter = sys.argv[2] if len(sys.argv) > 2 else "10001"
 if isinstance(zip_filter, bytes):
     zip_filter = zip_filter.decode('ascii')
 socket.setsockopt_string(zmq.SUBSCRIBE, zip_filter)
+print "received message"
 
 while True:
     zip = tem = rel = ['', '', '', '', '']

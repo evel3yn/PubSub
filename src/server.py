@@ -1,3 +1,4 @@
+import copy
 import zmq
 import sys
 import Queue
@@ -44,6 +45,9 @@ socket.setsockopt(zmq.SUBSCRIBE, '')
 zipcodeArrayHis = Queue.Queue()
 temperatureArrayHis = Queue.Queue()
 relhumidityArrayHis = Queue.Queue()
+zipcodeArrayHisT = Queue.Queue()
+temperatureArrayHisT = Queue.Queue()
+relhumidityArrayHisT = Queue.Queue()
 
 # initialize history
 for x in range(0, 5):
@@ -59,14 +63,15 @@ relNewHis = 0
 
 # store 5 messages in a class
 class History:
+
     def __init__(self, zipc, tem, rel, stren, zipH, temH, relH):
-        zipcode = zipc
-        temperature = tem
-        relhumidity = rel
-        strength = stren
-        zipHis = zipH
-        temHis = temH
-        relHis = relH
+        self.zipcode = zipc
+        self.temperature = tem
+        self.relhumidity = rel
+        self.strength = stren
+        self.zipHis = zipH
+        self.temHis = temH
+        self.relHis = relH
 
 
 while True:
@@ -77,10 +82,15 @@ while True:
     hisList = []
 
     while (i < 5):
+        print "ready to receive"
         # blocking is default
         string = socket.recv_string()
+        print "received message"
         # receive the message
         zipcode, temperature, relhumidity, strength = string.split()
+        ###############################################################################################
+        print zipcode
+        print temperature
 
         # push in the new history
         zipcodeArrayHis.put(zipNewHis)
@@ -98,17 +108,17 @@ while True:
         relNewHis = int(relhumidity)
 
         # copy queue
-        zipcodeArrayHisT = zipcodeArrayHis
-        temperatureArrayHisT = temperatureArrayHis
-        relhumidityArrayHisT = relhumidityArrayHis
+        zipcodeArrayHisT.queue = copy.deepcopy(zipcodeArrayHis.queue)
+        temperatureArrayHisT.queue = copy.deepcopy(temperatureArrayHis.queue)
+        relhumidityArrayHisT.queue = copy.deepcopy(relhumidityArrayHis.queue)
 
         # History
         # change to list and then use '/' as delimiter to make a string
         tempt = [zipcodeArrayHisT.get(), zipcodeArrayHisT.get(), zipcodeArrayHisT.get(), zipcodeArrayHisT.get(),
                  zipcodeArrayHisT.get()]
         zipHis = '/'.join(str(e) for e in tempt)
-        tempt = [temperatureArrayHis.get(), temperatureArrayHis.get(), temperatureArrayHis.get(),
-                 temperatureArrayHis.get(), temperatureArrayHis.get()]
+        tempt = [temperatureArrayHisT.get(), temperatureArrayHisT.get(), temperatureArrayHisT.get(),
+                 temperatureArrayHisT.get(), temperatureArrayHisT.get()]
         temHis = '/'.join(str(e) for e in tempt)
         tempt = [relhumidityArrayHisT.get(), relhumidityArrayHisT.get(), relhumidityArrayHisT.get(),
                  relhumidityArrayHisT.get(), relhumidityArrayHisT.get()]
@@ -132,23 +142,29 @@ while True:
         # for every repeated element
         for zip in retZipList:
             indexList = []
+            i = 0
             for ziporigin in zipList:
                 if zip == ziporigin:
                     indexList.append(i)
+                i += 1
             # index of max strength element
             maxindex = getmax(indexList, strengList)
             # indexs of other repeated elemtns
             indexList.pop(maxindex)
             # pop up these repeated hisList elemtents
-            for index in indexList:
+            # sort the index reversely
+            reverseIndexList = reversed(sorted(indexList))
+            for index in reverseIndexList:
                 hisList.pop(index)
 
-    # send them seperately
-    # only need one context
-    socket2 = context.socket(zmq.PUB)
-    socket.bind("tcp://*:5556")
-    # send all history
-    for his in hisList:
-        # send last 5 infor (if repeated, not send)
-        socket.send_string("%i %i %i %i %s %s %s" % (
-        his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))
+
+                # # send them seperately
+                # # only need one context
+                # socket2 = context.socket(zmq.PUB)
+                # socket.bind("tcp://*:5556")
+                # # send all history
+                # for his in hisList:
+                #     # send last 5 infor (if repeated, not send)
+                #     socket.send_string("%i %i %i %i %s %s %s" % (
+                #     his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))
+                #     print "send message"

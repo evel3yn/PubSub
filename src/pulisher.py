@@ -1,3 +1,5 @@
+from time import sleep
+
 import zmq
 import sys
 from random import randrange
@@ -23,3 +25,5 @@ while True:
     relhumidity = randrange(10, 60)
 
     socket.send_string("%i %i %i %i" % (zipcode, temperature, relhumidity, strength))
+    # print "send messages"
+    sleep(3)
