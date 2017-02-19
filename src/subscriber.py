@@ -5,23 +5,20 @@ import sys
 
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
+# ip
 srv_addr = sys.argv[1] if len(sys.argv) > 1 else "localhost"
 connect_str = "tcp://" + srv_addr + ":5556"
 print("Collecting updates from weather server...")
 socket.connect(connect_str)
+#filter
 zip_filter = sys.argv[2] if len(sys.argv) > 2 else "10001"
 if isinstance(zip_filter, bytes):
     zip_filter = zip_filter.decode('ascii')
 socket.setsockopt_string(zmq.SUBSCRIBE, zip_filter)
 
 while True:
-    zip = array('s', ['0', '0', '0', '0', '0'])
-    tem = array('s', ['0', '0', '0', '0', '0'])
-    rel = array('s', ['0', '0', '0', '0', '0'])
-
-    zipInt = array('i', [0, 0, 0, 0, 0])
-    temInt = array('i', [0, 0, 0, 0, 0])
-    relInt = array('i', [0, 0, 0, 0, 0])
+    zip = tem = rel = ['', '', '', '', '']
+    zipInt = temInt = relInt = [0, 0, 0, 0, 0]
 
     i = 0
 

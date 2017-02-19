@@ -17,6 +17,7 @@ def checksame(zlist):
     return retlist
 
 
+# return the index of element who has the max strength
 def getmax(indexList, strengList):
     a = []
     for index in indexList:
@@ -24,11 +25,21 @@ def getmax(indexList, strengList):
     return a.index(max(a))
 
 
+#connext the socket
 context = zmq.Context()
-socket = context.socket(zmq.PUB)
-socket.bind("tcp://*:5556")
+# socket = context.socket(zmq.PUB)
+# socket.bind("tcp://*:5556")
+
+socket = context.socket(zmq.SUB)
+# first argument is IP of publisher
+srv_addr = sys.argv[1] if len(sys.argv) > 1 else "localhost"
+connect_str = "tcp://" + srv_addr + ":5556"
+
+socket.connect(connect_str)
+
+
 # subscribe all incoming topic
-socket.setsockopt(zmq.SUBSCRIBE, "")
+socket.setsockopt(zmq.SUBSCRIBE, '')
 
 zipcodeArrayHis = Queue.Queue()
 temperatureArrayHis = Queue.Queue()
@@ -48,7 +59,7 @@ relNewHis = 0
 
 # store 5 messages in a class
 class History:
-    def __init__(self, zipc=None, tem=None, rel=None, stren=None, zipH=None, temH=None, relH=None):
+    def __init__(self, zipc, tem, rel, stren, zipH, temH, relH):
         zipcode = zipc
         temperature = tem
         relhumidity = rel
@@ -106,7 +117,7 @@ while True:
         # store the message in class array
         hisList.append(History(zipcode, temperature, relhumidity, int(strength), zipHis, temHis, relHis))
 
-        i = i + 1
+        i += 1
 
     # get rid of the repeated topic hisList elements.
     # get all the zipcode
@@ -138,6 +149,6 @@ while True:
     socket.bind("tcp://*:5556")
     # send all history
     for his in hisList:
-        # send last 5 infor as history
+        # send last 5 infor (if repeated, not send)
         socket.send_string("%i %i %i %i %s %s %s" % (
-            his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))
+        his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))

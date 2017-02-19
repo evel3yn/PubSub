@@ -1,20 +1,19 @@
-import math
+import zmq
+import sys
+from random import randrange
 
+context = zmq.Context()
+socket = context.socket(zmq.PUB)
+socket.bind("tcp://*:5556")
 
-class Solver:
-    def demo(self):
-        while True:
-            a = int(input("a "))
-            b = int(input("b "))
-            c = int(input("c "))
-            d = b ** 2 - 4 * a * c
-            if d >= 0:
-                disc = math.sqrt(d)
-                root1 = (-b + disc) / (2 * a)
-                root2 = (-b - disc) / (2 * a)
-                print(root1, root2)
-            else:
-                print('error')
+print("Sending information to whether server...")
 
+zipcode = randrange(1, 100000)
+# second argument is strength of pub, 0~...
+strength = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 
-Solver().demo()
+while True:
+    temperature = randrange(-80, 135)
+    relhumidity = randrange(10, 60)
+
+    socket.send_string("%i %i %i %i" % (zipcode, temperature, relhumidity, strength))
