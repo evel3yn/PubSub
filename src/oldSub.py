@@ -29,7 +29,9 @@ socket.setsockopt_string(zmq.SUBSCRIBE, zip_filter)
 # Process 5 updates
 total_temp = 0
 for update_nbr in range(5):
+    print "ready to receive"
     string = socket.recv_string()
+    print "message received"
     zipcode, temperature, relhumidity = string.split()
     total_temp += int(temperature)
 

@@ -1,9 +1,6 @@
 import copy
 import zmq
-import sys
 import Queue
-from array import *
-
 
 # False if no same zipcode
 # return all zipcode if it has same element
@@ -32,15 +29,17 @@ context = zmq.Context()
 # socket.bind("tcp://*:5556")
 
 socket = context.socket(zmq.SUB)
-# first argument is IP of publisher
-srv_addr = sys.argv[1] if len(sys.argv) > 1 else "localhost"
-connect_str = "tcp://" + srv_addr + ":5556"
-
-socket.connect(connect_str)
+socket.bind("tcp://*:5556")
 
 
 # subscribe all incoming topic
 socket.setsockopt(zmq.SUBSCRIBE, '')
+
+# send them seperately
+# only need one context
+socket2 = context.socket(zmq.PUB)
+socket2.bind("tcp://*:5550")
+
 
 zipcodeArrayHis = Queue.Queue()
 temperatureArrayHis = Queue.Queue()
@@ -65,10 +64,10 @@ relNewHis = 0
 class History:
 
     def __init__(self, zipc, tem, rel, stren, zipH, temH, relH):
-        self.zipcode = zipc
-        self.temperature = tem
-        self.relhumidity = rel
-        self.strength = stren
+        self.zipcode = int(zipc)
+        self.temperature = int(tem)
+        self.relhumidity = int(rel)
+        self.strength = int(stren)
         self.zipHis = zipH
         self.temHis = temH
         self.relHis = relH
@@ -88,9 +87,8 @@ while True:
         print "received message"
         # receive the message
         zipcode, temperature, relhumidity, strength = string.split()
-        ###############################################################################################
+
         print zipcode
-        print temperature
 
         # push in the new history
         zipcodeArrayHis.put(zipNewHis)
@@ -157,14 +155,9 @@ while True:
             for index in reverseIndexList:
                 hisList.pop(index)
 
-
-                # # send them seperately
-                # # only need one context
-                # socket2 = context.socket(zmq.PUB)
-                # socket.bind("tcp://*:5556")
-                # # send all history
-                # for his in hisList:
-                #     # send last 5 infor (if repeated, not send)
-                #     socket.send_string("%i %i %i %i %s %s %s" % (
-                #     his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))
-                #     print "send message"
+    # send all history
+    for his in hisList:
+        # send last 5 infor (if repeated, not send)
+        socket2.send_string("%i %i %i %i %s %s %s" % (
+            his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))
+        print "send message"
