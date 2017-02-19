@@ -81,14 +81,14 @@ while True:
     hisList = []
 
     while (i < 5):
-        print "ready to receive"
+        print ("ready to receive")
         # blocking is default
         string = socket.recv_string()
-        print "received message"
+        print ("received message")
         # receive the message
         zipcode, temperature, relhumidity, strength = string.split()
 
-        print zipcode
+        print (zipcode)
 
         # push in the new history
         zipcodeArrayHis.put(zipNewHis)
@@ -160,4 +160,4 @@ while True:
         # send last 5 infor (if repeated, not send)
         socket2.send_string("%i %i %i %i %s %s %s" % (
             his.zipcode, his.temperature, his.relhumidity, his.strength, his.zipHis, his.temHis, his.relHis))
-        print "send message"
+        print ("send message")

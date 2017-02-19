@@ -20,9 +20,9 @@ while True:
     zipInt = temInt = relInt = [0, 0, 0, 0, 0]
 
     i = 0
-    print "ready to receive"
+    print("ready to receive")
     string = socket.recv_string()
-    print "message received"
+    print("message received")
     zipcodeStr, temperatureStr, relhumidityStr, strengthStr, zipHisStr, temHisStr, relHisStr = string.split()
     # receive history
     zip[0], zip[1], zip[2], zip[3], zip[4] = zipHisStr.split("/")
